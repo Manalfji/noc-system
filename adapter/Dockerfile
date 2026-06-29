@@ -8,7 +8,6 @@ RUN npm ci --only=production
 
 # Create app structure
 COPY src/ ./src/
-COPY config/ ./config/
 
 # Create logs directory
 RUN mkdir -p /app/logs
