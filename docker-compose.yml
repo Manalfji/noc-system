@@ -7,10 +7,10 @@ services:
     container_name: noc-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ***
+      MYSQL_ROOT_PASSWORD: NocSecurePass2024
       MYSQL_DATABASE: zabbix
       MYSQL_USER: zabbix
-      MYSQL_PASSWORD: ***
+      MYSQL_PASSWORD: NocSecurePass2024
     volumes:
       - mysql_data:/var/lib/mysql
       - ./init-scripts/mysql:/docker-entrypoint-initdb.d
@@ -31,8 +31,8 @@ services:
       DB_SERVER_HOST: mysql
       MYSQL_DATABASE: zabbix
       MYSQL_USER: zabbix
-      MYSQL_PASSWORD: ***
-      MYSQL_ROOT_PASSWORD: ***
+      MYSQL_PASSWORD: NocSecurePass2024
+      MYSQL_ROOT_PASSWORD: NocSecurePass2024
       ZBX_STARTVMWARECOLLECTORS: 1
       ZBX_VMWAREPERFREQUENCY: 60
       ZBX_VMWARETIMEOUT: 10
@@ -62,8 +62,8 @@ services:
       DB_SERVER_HOST: mysql
       MYSQL_DATABASE: zabbix
       MYSQL_USER: zabbix
-      MYSQL_PASSWORD: ***
-      MYSQL_ROOT_PASSWORD: ***
+      MYSQL_PASSWORD: NocSecurePass2024
+      MYSQL_ROOT_PASSWORD: NocSecurePass2024
       PHP_TZ: Europe/Berlin
     ports:
       - "8081:8080"
@@ -103,7 +103,7 @@ services:
     environment:
       ZABBIX_URL: http://zabbix-web:8080
       ZABBIX_USER: Admin
-      ZABBIX_PASSWORD: ***
+      ZABBIX_PASSWORD: NocSecurePass2024
       ADAPTER_PORT: 3000
       WEBSOCKET_PORT: 3001
       POLL_INTERVAL: 5000
