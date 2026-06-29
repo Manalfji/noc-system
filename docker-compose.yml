@@ -6,6 +6,9 @@ services:
     image: mysql:8.0
     container_name: noc-mysql
     restart: unless-stopped
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_bin
     environment:
       MYSQL_ROOT_PASSWORD: NocSecurePass2024
       MYSQL_DATABASE: zabbix
