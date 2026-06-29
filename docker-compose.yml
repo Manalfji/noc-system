@@ -106,7 +106,7 @@ services:
     environment:
       ZABBIX_URL: http://zabbix-web:8080
       ZABBIX_USER: Admin
-      ZABBIX_PASSWORD: NocSecurePass2024
+      ZABBIX_PASSWORD: zabbix
       ADAPTER_PORT: 3000
       WEBSOCKET_PORT: 3001
       POLL_INTERVAL: 5000
