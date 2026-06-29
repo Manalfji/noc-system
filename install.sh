@@ -22,7 +22,10 @@ if ! command -v docker &> /dev/null; then
 fi
 
 mkdir -p /opt/noc-system
-cp -r "$(dirname "$0")"/* /opt/noc-system/
+# Only copy if we're not already in /opt/noc-system
+if [ "$(pwd)" != "/opt/noc-system" ]; then
+    cp -r "$(dirname "$0")"/* /opt/noc-system/
+fi
 cd /opt/noc-system
 
 mkdir -p nginx/ssl
