@@ -1,0 +1,19 @@
+# Docker
+.env
+*.env
+
+# Logs
+logs/
+*.log
+
+# SSL (private)
+nginx/ssl/*.key
+nginx/ssl/*.crt
+
+# Data
+mysql_data/
+*.data
+
+# OS
+.DS_Store
+Thumbs.db

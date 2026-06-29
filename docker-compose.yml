@@ -1,0 +1,194 @@
+version: '3.8'
+
+services:
+  # Database
+  mysql:
+    image: mysql:8.0
+    container_name: noc-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ***
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: ***
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-scripts/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - noc-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Zabbix Server
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:alpine-7.4-latest
+    container_name: noc-zabbix-server
+    restart: unless-stopped
+    environment:
+      DB_SERVER_HOST: mysql
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: ***
+      MYSQL_ROOT_PASSWORD: ***
+      ZBX_STARTVMWARECOLLECTORS: 1
+      ZBX_VMWAREPERFREQUENCY: 60
+      ZBX_VMWARETIMEOUT: 10
+    ports:
+      - "10051:10051"
+    volumes:
+      - zabbix_alertscripts:/usr/lib/zabbix/alertscripts
+      - zabbix_externalscripts:/usr/lib/zabbix/externalscripts
+      - zabbix_modules:/var/lib/zabbix/modules
+      - zabbix_enc:/var/lib/zabbix/enc
+      - zabbix_ssh_keys:/var/lib/zabbix/ssh_keys
+      - zabbix_mibs:/var/lib/zabbix/mibs
+      - zabbix_db_socket:/var/run/mysqld
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - noc-network
+
+  # Zabbix Web Interface
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-mysql:alpine-7.4-latest
+    container_name: noc-zabbix-web
+    restart: unless-stopped
+    environment:
+      ZBX_SERVER_HOST: zabbix-server
+      DB_SERVER_HOST: mysql
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: ***
+      MYSQL_ROOT_PASSWORD: ***
+      PHP_TZ: Europe/Berlin
+    ports:
+      - "8081:8080"
+    depends_on:
+      - zabbix-server
+    networks:
+      - noc-network
+
+  # Zabbix Agent (for monitoring the NOC system itself)
+  zabbix-agent:
+    image: zabbix/zabbix-agent2:alpine-7.4-latest
+    container_name: noc-zabbix-agent
+    restart: unless-stopped
+    environment:
+      ZBX_HOSTNAME: "NOC-System"
+      ZBX_SERVER_HOST: zabbix-server
+      ZBX_SERVER_PORT: 10051
+      ZBX_METADATA: "NOC,Docker"
+    privileged: true
+    volumes:
+      - /var/run:/var/run
+      - /sys:/sys
+      - /proc:/proc
+      - /:/rootfs
+    depends_on:
+      - zabbix-server
+    networks:
+      - noc-network
+
+  # NOC Adapter (Zabbix ↔ OpenMCT Bridge)
+  noc-adapter:
+    build:
+      context: ./adapter
+      dockerfile: Dockerfile
+    container_name: noc-adapter
+    restart: unless-stopped
+    environment:
+      ZABBIX_URL: http://zabbix-web:8080
+      ZABBIX_USER: Admin
+      ZABBIX_PASSWORD: ***
+      ADAPTER_PORT: 3000
+      WEBSOCKET_PORT: 3001
+      POLL_INTERVAL: 5000
+      LOG_LEVEL: info
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - ./adapter/config:/app/config
+      - ./adapter/logs:/app/logs
+    depends_on:
+      - zabbix-server
+      - zabbix-web
+    networks:
+      - noc-network
+
+  # OpenMCT Frontend
+  openmct:
+    build:
+      context: ./openmct
+      dockerfile: Dockerfile
+    container_name: noc-openmct
+    restart: unless-stopped
+    environment:
+      ADAPTER_URL: http://noc-adapter:3000
+      ADAPTER_WS_URL: ws://noc-adapter:3001
+      AUTH_ENABLED: "true"
+      AUTH_MODE: "basic"
+      DEFAULT_ADMIN_USER: "NOC-Admin"
+      DEFAULT_ADMIN_PASS: "A1b2c3"
+    ports:
+      - "8090:80"
+    volumes:
+      - openmct_config:/usr/share/nginx/html/config
+      - openmct_plugins:/usr/share/nginx/html/plugins
+    depends_on:
+      - noc-adapter
+    networks:
+      - noc-network
+
+  # Nginx Reverse Proxy (SSL + Auth)
+  nginx:
+    image: nginx:alpine
+    container_name: noc-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/htpasswd:/etc/nginx/htpasswd
+    depends_on:
+      - openmct
+      - zabbix-web
+    networks:
+      - noc-network
+
+  # Redis for session management
+  redis:
+    image: redis:7-alpine
+    container_name: noc-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - noc-network
+
+volumes:
+  mysql_data:
+  zabbix_alertscripts:
+  zabbix_externalscripts:
+  zabbix_modules:
+  zabbix_enc:
+  zabbix_ssh_keys:
+  zabbix_mibs:
+  zabbix_db_socket:
+  openmct_config:
+  openmct_plugins:
+  redis_data:
+
+networks:
+  noc-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

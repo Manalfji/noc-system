@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>NOC Dashboard v2.0.0</title>
+    <script src="config/config.js"></script>
+    <script src="openmct.js"></script>
+    <script src="plugins/zabbix-adapter.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; background: #1a1a2e; color: #eee; }
+        #header { background: #16213e; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+        #header h1 { margin: 0; font-size: 18px; }
+        #user-info { font-size: 12px; }
+        #main { height: calc(100vh - 50px); }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>NOC Dashboard v2.0.0</h1>
+        <div id="user-info">Welcome, NOC-Admin | <a href="/logout" style="color: #00d4ff;">Logout</a></div>
+    </div>
+    <div id="main"></div>
+    <script>
+        openmct.setAssetPath('/');
+        openmct.install(openmct.plugins.LocalStorage());
+        openmct.install(openmct.plugins.MyItems());
+        openmct.install(openmct.plugins.UTCTimeSystem());
+        openmct.install(openmct.plugins.Timeline());
+        openmct.install(openmct.plugins.Tabs());
+        openmct.install(openmct.plugins.FlexibleLayout());
+        openmct.install(openmct.plugins.ZabixAdapter());
+        openmct.start(document.getElementById('main'));
+    </script>
+</body>
+</html>
