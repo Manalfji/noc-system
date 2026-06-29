@@ -9,7 +9,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 apt-get update
-apt-get install -y ca-certificates curl gnupg lsb-release
+apt-get install -y ca-certificates curl gnupg lsb-release apache2-utils openssl
 
 if ! command -v docker &> /dev/null; then
     mkdir -p /etc/apt/keyrings
