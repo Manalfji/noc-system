@@ -1,10 +1,4 @@
 # NOC Dashboard - OpenMCT + Zabbix Integration
-
-upstream dashboard_backend {
-    server noc-system-dashboard-1:80;
-    keepalive 32;
-}
-
 upstream openmct_backend {
     server openmct:80;
     keepalive 32;
@@ -45,17 +39,6 @@ server {
     auth_basic_user_file /etc/nginx/htpasswd;
 
     location / {
-        proxy_pass http://dashboard_backend;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-        proxy_read_timeout 86400;
-    }
-
-    location /openmct/ {
         proxy_pass http://openmct_backend;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
@@ -97,3 +80,16 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
+
+    location / {
+        proxy_pass http://zabbix_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffer_size 4k;
+        proxy_buffers 8 4k;
+        proxy_busy_buffers_size 8k;
+    }
+}
