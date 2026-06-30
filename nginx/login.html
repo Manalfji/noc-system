@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOC Dashboard - Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e1a;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: #1a1f2e;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.3);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #2a3f5f;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo h1 {
+            color: #00d4ff;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        .logo p {
+            color: #8b9dc3;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            color: #8b9dc3;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #2a3f5f;
+            border-radius: 5px;
+            background: #0f1525;
+            color: #fff;
+            font-size: 16px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #00d4ff;
+            color: #0a0e1a;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #33ddff;
+        }
+        .error {
+            color: #ff4757;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+        .version {
+            text-align: center;
+            margin-top: 20px;
+            color: #5a6f8f;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>🚀 NOC Dashboard</h1>
+            <p>Network Operations Center v2.0</p>
+        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="NOC-Admin">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="A1b2c3">
+            </div>
+            <button type="submit">Login</button>
+            <div class="error" id="error"></div>
+        </form>
+        <div class="version">Powered by OpenMCT + Zabbix 7.4</div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.setItem('noc_token', data.token);
+                    window.location.href = '/';
+                } else {
+                    document.getElementById('error').textContent = data.error || 'Login failed';
+                    document.getElementById('error').style.display = 'block';
+                }
+            } catch (err) {
+                document.getElementById('error').textContent = 'Connection error';
+                document.getElementById('error').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
