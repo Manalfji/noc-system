@@ -12,8 +12,8 @@ Network Operations Center system combining NASA OpenMCT and Zabbix 7.4 monitorin
 
 ## Requirements
 - Debian 12 or 13
-- 4GB RAM minimum
-- 20GB disk space
+- 6GB RAM minimum
+- 30GB disk space
 - Internet connection
 
 ## Quick Start
