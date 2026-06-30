@@ -15,7 +15,7 @@ app.use(cookieParser());
 app.use(express.static('public'));
 
 // Config
-const ZABBIX_URL = process.env.ZABBIX_URL || 'http://zabbix-web:8080';
+const ZABBIX_URL = process.env.ZABBIX_URL || 'http://noc-zabbix-web:8080';
 const ZABBIX_USER = process.env.ZABBIX_USER || 'Admin';
 const ZABBIX_PASSWORD = process.env.ZABBIX_PASSWORD || 'zabbix';
 const PORT = process.env.ADAPTER_PORT || 3000;
