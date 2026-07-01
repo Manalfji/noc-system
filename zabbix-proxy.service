@@ -1,0 +1,15 @@
+[Unit]
+Description=Zabbix NOC Dashboard Proxy
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/.openclaw/workspace
+ExecStart=/usr/bin/python3 /root/.openclaw/workspace/zabbix-db-proxy.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
